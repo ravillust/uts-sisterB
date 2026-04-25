@@ -192,7 +192,7 @@ PYTHONPATH=. python -m src.publisher --mode stress \
 
 ## Video Demo
 
-🎬 **[Link YouTube Demo](https://youtube.com/...)** — *tambahkan link setelah upload*
+🎬 **[Link YouTube Demo](https://youtu.be/AJy16TcPlbg)**
 
 Durasi: 5–8 menit, mendemonstrasikan:
 - Build image dan run container
