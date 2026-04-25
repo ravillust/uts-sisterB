@@ -1,0 +1,49 @@
+services:
+  aggregator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: uts-aggregator
+    environment:
+      DEDUP_DB_PATH: /app/data/dedup.db
+      LOG_LEVEL: INFO
+    volumes:
+      - aggregator_data:/app/data
+    ports:
+      - 8000:8000
+    networks:
+      - pubsub-net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+
+  publisher:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: uts-publisher
+    command: >
+      sh -c "echo 'Menunggu aggregator siap...' &&
+      sleep 15 &&
+      python -m src.publisher --mode stress --count 5000 --dup-rate 0.25 --url http://aggregator:8000"
+    environment:
+      PYTHONPATH: /app
+    networks:
+      - pubsub-net
+    depends_on:
+      aggregator:
+        condition: service_healthy
+    restart: "no"
+
+networks:
+  pubsub-net:
+    driver: bridge
+    internal: false
+
+volumes:
+  aggregator_data:
+    driver: local
